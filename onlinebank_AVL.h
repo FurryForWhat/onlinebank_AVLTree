@@ -53,6 +53,9 @@ struct node* db[SIZE];
 //***********   Global Variable     *****************
 int users=0;
 int g_id= 0;    // should use before loading file for txt file user indexing
+int mail_validate_flag= 0; // for Mail Validation
+int mail_exist_flag= 0;
+
 
 // ************ Global Variable(array)  ***************
 int space_array[30];
@@ -69,6 +72,10 @@ struct node* newNode(int id);
 void copy_two_char_array(char receiver[200] ,char transmitter[200] );
 void data_record();
 void data_load();
+void mail_validate(char toValidate[50]);
+void mail_exist(char Exist[50]);
+
+
 
 void main_section(){
     int input= 0;
@@ -88,6 +95,64 @@ void main_section(){
         printf("******Your input is invalid:Try again********\n");
         main_section();
     }
+}
+
+void mail_validate(char toValidate[50]){
+    char form[10]={'@','g','m','a','i','l','.','c','o','m'};
+    int mail_count= 0;
+    int name_count= 0;
+
+    for (int i = 0; i < charCounting(toValidate); ++i) {
+        if(toValidate[i] == ' '){
+            printf(" Your mail contain spaces which is not allowed!!");
+            exit(1);
+        }else{
+            if(toValidate[i] == '@'){
+                break;
+            }
+            name_count++;
+        }
+    }
+    for (int i = 0; i < charCounting(toValidate); ++i) {
+        if(toValidate[name_count] != form[i]){
+            break;
+        }else{
+            name_count++;
+            mail_count++;
+        }
+
+    }
+
+    if(mail_count == 10){
+        mail_validate_flag= 1;
+    }
+}
+
+void mail_exist(char Exist[50]){
+    int input_check= charCounting(Exist);
+    int sameCount= 0;
+    for (int i = 0; i < users ; ++i) {
+     int email_check= charCounting(db[i]->info->email);
+
+        if(input_check != email_check) {
+            break;
+        }else {
+            for (int j = 0; j < input_check; ++j) {
+                if (Exist[j] == db[i]->info->email[j]) {
+                    sameCount++;
+                } else{
+                    break;
+                }
+            }
+        }
+
+        if( sameCount == input_check){
+            mail_exist_flag= i;
+        }
+
+    }
+
+
 }
 int charCounting(char toCount[50]){ // toCount[50] = {'w','i','n','@'gmail.com,'\0' , '\0'}
     int charCount = 0;
@@ -173,46 +238,63 @@ void signUp(){
 
     printf("Enter your email:");
     scanf(" %[^\n]",&reEmail[0]);
-    //****** add more ********
-    printf("Enter your name:");
-    scanf(" %[^\n]",&re_name[0]);
-    //****** add more ********
-    printf("Enter your NRC:");
-    scanf(" %[^\n]",&re_nrc[0]);
-    //****** add more ********
-    printf("Enter your password!:");
-    scanf(" %[^\n]",&re_pass[0]);
-    //****** add more ********
-    printf("Enter your Phone Number:");
-    scanf("%llu",&re_phone);
-
-
-//id name nrc email password pOrb loan_status monthly_income
+    mail_validate(reEmail);
+    if(mail_validate_flag == 1){
+        mail_exist(reEmail);
+        if( mail_exist_flag == 0){
+            printf("Your mail can be used !!!!!\n");
+            printf("Enter your name:");
+            scanf(" %[^\n]",&re_name[0]);
+            //****** add more ********
+            printf("Enter your NRC:");
+            scanf(" %[^\n]",&re_nrc[0]);
+            //****** add more ********
+            printf("Enter your password!:");
+            scanf(" %[^\n]",&re_pass[0]);
+            //****** add more ********
+            printf("Enter your Phone Number:");
+            scanf("%llu",&re_phone);
+            //id name nrc email password pOrb loan_status monthly_income
 //  accountStatus account_Level phNumber current_amount address TransRC
-    struct node* new= newNode(users);
+            struct node* new= newNode(users);
 
-    //to insert data
-    copy_two_char_array(new->info->name,re_name);
-    copy_two_char_array(new->info->email,reEmail);
-    copy_two_char_array(new->info->nrc,re_nrc);
-    copy_two_char_array(new->info->password,re_pass);
-    new->info->phNumber= re_phone;
-    db[users] = new;
+            //to insert data
+            copy_two_char_array(new->info->name,re_name);
+            copy_two_char_array(new->info->email,reEmail);
+            copy_two_char_array(new->info->nrc,re_nrc);
+            copy_two_char_array(new->info->password,re_pass);
+            new->info->phNumber= re_phone;
+            db[users] = new;
 
-//    printf("\nUser name is: %s and email: %s\n",db[users]->info->name,db[users]->info->email);
-    users++;
-    printf("Your registration is Successful");
+    printf("\nUser name is: %s and email: %s\n",db[users]->info->name,db[users]->info->email);
+            users++;
+            printf("Your registration is Successful");
 //    data_load();
-    char flag;
-    printf("\nWould u like to go Main Section?\nPress 'Y' for yes:");
-    scanf(" %c",&flag);
+            char flag;
+            printf("\nWould u like to go Main Section?\nPress 'Y' for yes:");
+            scanf(" %c",&flag);
 
-    if( flag == 'Y' || flag == 'y'){
-        main_section();
+            if( flag == 'Y' || flag == 'y'){
+                main_section();
+            }else{
+                data_record();
+                exit(1);
+            }
+
+        }else{
+            printf("Your mail is used!!!!\n Try with new one!!!\n");
+            signUp();
+        }
+
     }else{
-        data_record();
-        exit(1);
+        printf("your mail format isn't correct\n");
+        signUp();
     }
+    //****** add more ********
+
+
+
+
 }
 void data_record(){
 FILE *fptr= fopen("final_project_AVL.txt","w");
