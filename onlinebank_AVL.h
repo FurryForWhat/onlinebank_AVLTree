@@ -32,7 +32,8 @@ struct data{
     char address[100];
     int transAmoLimitPerDay; // transAmountLimitPerDay minimize for our project 5min
     struct trans trc[100];
-
+ //amount, loan,trc,ph,cash in out record, trs limit(depend on acc lvl)p or b
+ // account status, address
 };
 
 struct node{
@@ -55,7 +56,7 @@ int users=0;
 int g_id= 0;    // should use before loading file for txt file user indexing
 int mail_validate_flag= 0; // for Mail Validation
 int mail_exist_flag= 0;
-
+int checker_count= 0;
 
 // ************ Global Variable(array)  ***************
 int space_array[30];
@@ -69,12 +70,12 @@ int charCounting(char toCount[50]);
 void space_counter();
 void integer_to_char(unsigned int value);
 struct node* newNode(int id);
-void copy_two_char_array(char receiver[200] ,char transmitter[200] );
+void copy_two_char_array(char receiver[100] ,char transmitter[100] );
 void data_record();
 void data_load();
 void mail_validate(char toValidate[50]);
 void mail_exist(char Exist[50]);
-
+int check_input(char input);
 
 
 void main_section(){
@@ -245,41 +246,53 @@ void signUp(){
             printf("Your mail can be used !!!!!\n");
             printf("Enter your name:");
             scanf(" %[^\n]",&re_name[0]);
-            //****** add more ********
-            printf("Enter your NRC:");
-            scanf(" %[^\n]",&re_nrc[0]);
-            //****** add more ********
-            printf("Enter your password!:");
-            scanf(" %[^\n]",&re_pass[0]);
-            //****** add more ********
-            printf("Enter your Phone Number:");
-            scanf("%llu",&re_phone);
-            //id name nrc email password pOrb loan_status monthly_income
-//  accountStatus account_Level phNumber current_amount address TransRC
-            struct node* new= newNode(users);
-
-            //to insert data
-            copy_two_char_array(new->info->name,re_name);
-            copy_two_char_array(new->info->email,reEmail);
-            copy_two_char_array(new->info->nrc,re_nrc);
-            copy_two_char_array(new->info->password,re_pass);
-            new->info->phNumber= re_phone;
-            db[users] = new;
-
-    printf("\nUser name is: %s and email: %s\n",db[users]->info->name,db[users]->info->email);
-            users++;
-            printf("Your registration is Successful");
-//    data_load();
-            char flag;
-            printf("\nWould u like to go Main Section?\nPress 'Y' for yes:");
-            scanf(" %c",&flag);
-
-            if( flag == 'Y' || flag == 'y'){
-                main_section();
-            }else{
-                data_record();
-                exit(1);
+            for (int i = 0; i < charCounting(re_name);++i) {
+                 int result= check_input(re_name[i]);
+                 if (result == 1){
+                        checker_count++;
+                 }else{
+                     printf("Your name contain unsual word :%c", re_name[i]);
+                     signUp();
+                 }
             }
+            if(charCounting(re_name) == checker_count){
+                //****** add more ********
+                printf("Enter your NRC:");
+                scanf(" %[^\n]",&re_nrc[0]);
+                //****** add more ********
+                printf("Enter your password!:");
+                scanf(" %[^\n]",&re_pass[0]);
+                //****** add more ********
+                printf("Enter your Phone Number:");
+                scanf("%llu",&re_phone);
+                //id name nrc email password pOrb loan_status monthly_income
+//  accountStatus account_Level phNumber current_amount address TransRC
+                struct node* new= newNode(users);
+
+                //to insert data
+                copy_two_char_array(new->info->name,re_name);
+                copy_two_char_array(new->info->email,reEmail);
+                copy_two_char_array(new->info->nrc,re_nrc);
+                copy_two_char_array(new->info->password,re_pass);
+                new->info->phNumber= re_phone;
+                db[users] = new;
+
+                printf("\nUser name is: %s and email: %s\n",db[users]->info->name,db[users]->info->email);
+                users++;
+                printf("Your registration is Successful");
+//    data_load();
+                char flag;
+                printf("\nWould u like to go Main Section?\nPress 'Y' for yes:");
+                scanf(" %c",&flag);
+
+                if( flag == 'Y' || flag == 'y'){
+                    main_section();
+                }else{
+                    data_record();
+
+                }
+            }
+
 
         }else{
             printf("Your mail is used!!!!\n Try with new one!!!\n");
@@ -350,7 +363,7 @@ struct node* newNode(int id){
 
     struct node* new=(struct node*)malloc(sizeof(struct node));
     if (new == NULL){
-        return 0;
+        return NULL;
     }else{
         new->id= id;
         new->info= (struct data*)malloc(sizeof(struct data));
@@ -361,11 +374,25 @@ struct node* newNode(int id){
     }
 }
 
-void copy_two_char_array(char receiver[200] ,char transmitter[200] ){
+void copy_two_char_array(char receiver[100] ,char transmitter[100] ){
     int transmit_counter = charCounting(transmitter);
     for(int i=0; i<transmit_counter; i++){
         receiver[i] = transmitter[i];
     }
 }
+
+int check_input(char input){
+    if( input >= 49 && input<= 57 && input =='\0'){
+        return 1;
+    }else if(input >= 65 && input  <= 90 ){
+        return 1;
+    }else if ( input >= 97 && input <= 122){
+        return 1;
+    }
+    else{
+        return -1;
+    }
+}
+
 
 #endif MYFIRSTPROGRAM_ONLINEBANK_AVL_H
