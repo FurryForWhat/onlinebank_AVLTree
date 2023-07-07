@@ -7,8 +7,6 @@
 #define MYFIRSTPROGRAM_ONLINEBANK_AVL_H
 
 
-#include "stdio.h"
-#include "stdlib.h"
 #define SIZE 5000
 
 struct trans{
@@ -22,9 +20,9 @@ struct data{
     char nrc[50];
     char email[50];
     char password[50];
-    char pOrb[20]; // personal or business
+    char pOrb[10]; // personal or business
     char loan_s[2]; // loan status
-    unsigned int monthly_income;
+//    unsigned int monthly_income;
     char acc_s[10]; //account status
     int acc_level; // copy
     unsigned long long int phNumber;
@@ -70,13 +68,21 @@ int charCounting(char toCount[50]);
 void space_counter();
 void integer_to_char(unsigned int value);
 struct node* newNode(int id);
-void copy_two_char_array(char receiver[100] ,char transmitter[100] );
+void copy_two_char_array(struct node* receiver ,struct node* transmitter );
 void data_record();
 void data_load();
 void mail_validate(char toValidate[50]);
 void mail_exist(char Exist[50]);
 int check_input(char input);
 
+
+
+//************* for node *******************
+int balance_factor(struct node* root);
+int height(struct node* root);
+struct node* insert(struct node* root, int data);
+struct node* rotate_left(struct node* root);
+struct node* rotate_right(struct node* root);
 
 void main_section(){
     int input= 0;
@@ -136,7 +142,7 @@ void mail_exist(char Exist[50]){
      int email_check= charCounting(db[i]->info->email);
 
         if(input_check != email_check) {
-            break;
+
         }else {
             for (int j = 0; j < input_check; ++j) {
                 if (Exist[j] == db[i]->info->email[j]) {
@@ -231,51 +237,50 @@ void sign_in(){
 }
 
 void signUp(){
-    char reEmail[50];
-    char re_name[50];
-    char re_nrc[50];
-    char re_pass[50];
-    unsigned long long int re_phone=0;
+    struct node* new= newNode(users);
+    db[users] = new;
 
     printf("Enter your email:");
-    scanf(" %[^\n]",&reEmail[0]);
-    mail_validate(reEmail);
+    scanf(" %[^\n]",&db[users]->info->email);
+    mail_validate(db[users]->info->email);
     if(mail_validate_flag == 1){
-        mail_exist(reEmail);
+        mail_exist(db[users]->info->email);
         if( mail_exist_flag == 0){
             printf("Your mail can be used !!!!!\n");
             printf("Enter your name:");
-            scanf(" %[^\n]",&re_name[0]);
-            for (int i = 0; i < charCounting(re_name);++i) {
-                 int result= check_input(re_name[i]);
+            scanf(" %[^\n]",&db[users]->info->name);
+            checker_count = 0;
+            for (int i = 0; i < charCounting(db[users]->info->name);++i) {
+                 int result= check_input(db[users]->info->name[i]);
                  if (result == 1){
                         checker_count++;
                  }else{
-                     printf("Your name contain unsual word :%c", re_name[i]);
+                     printf("Your name contain unsual word :%c\n", db[users]->info->name[i]);
                      signUp();
                  }
             }
-            if(charCounting(re_name) == checker_count){
+            if(charCounting(db[users]->info->name) == checker_count){
                 //****** add more ********
                 printf("Enter your NRC:");
-                scanf(" %[^\n]",&re_nrc[0]);
+                scanf(" %[^\n]",&db[users]->info->nrc);
                 //****** add more ********
                 printf("Enter your password!:");
-                scanf(" %[^\n]",&re_pass[0]);
+                scanf(" %[^\n]",&db[users]->info->password);
                 //****** add more ********
                 printf("Enter your Phone Number:");
-                scanf("%llu",&re_phone);
+                scanf("%llu",&db[users]->info->phNumber);
+
+                printf("Enter your Deposit amount:");
+                scanf("%u",&db[users]->info->cur_amount);
+
+                printf("Enter your address:");
+                scanf(" %[^\n]", &db[users]->info->address);
+                copy_two_char_array(db[users]->info->pOrb,db[0]->info->pOrb);
+                copy_two_char_array(db[users]->info->acc_s,db[0]->info->acc_s);
+                new->info->acc_level=  db[0]->info->acc_level;
                 //id name nrc email password pOrb loan_status monthly_income
 //  accountStatus account_Level phNumber current_amount address TransRC
-                struct node* new= newNode(users);
 
-                //to insert data
-                copy_two_char_array(new->info->name,re_name);
-                copy_two_char_array(new->info->email,reEmail);
-                copy_two_char_array(new->info->nrc,re_nrc);
-                copy_two_char_array(new->info->password,re_pass);
-                new->info->phNumber= re_phone;
-                db[users] = new;
 
                 printf("\nUser name is: %s and email: %s\n",db[users]->info->name,db[users]->info->email);
                 users++;
@@ -286,6 +291,7 @@ void signUp(){
                 scanf(" %c",&flag);
 
                 if( flag == 'Y' || flag == 'y'){
+                    data_record();
                     main_section();
                 }else{
                     data_record();
@@ -318,46 +324,51 @@ if( fptr == NULL){
 }
 //id name email nrc pass phNumber
 for (int i = 0; i < users; ++i) { // perfect timing for users (hapi hapi hapi)
-        fprintf(fptr,"%d%c%s%c%s%c%s%c%s%c%llu",db[i]->id,' ',db[i]->info->name,' ',db[i]->info->email,' ',db[i]->info->nrc,' ',db[i]->info->password,' ',db[i]->info->phNumber);
+        fprintf(fptr,"%d%c%s%c%s%c%s%c%s%c%llu%c%u%c%s%c%s%c%s%c%d",db[i]->id,' ',db[i]->info->name,' ',db[i]->info->email,' ',db[i]->info->nrc,' ',db[i]->info->password,' ',db[i]->info->phNumber,' ',db[i]->info->cur_amount,' ',db[i]->info->address,' ',db[i]->info->pOrb,' ',db[i]->info->acc_s,' ',db[i]->info->acc_level);
         fprintf(fptr,"%c",'\n');
+
 }
     fclose(fptr);
 }
 
 void data_load(){
-    int id;
-    char name[30];
-    char email[50];
-    char nrc[30];
-    char password[30];
-    unsigned long long int phone;
-    FILE *fptr= fopen("final_project_AVL.txt","r");
 
-if( fptr == NULL){
-    printf("Error at loadingAllDataFromFile Function!!!!!!!");
-    exit(1);
-}
+    FILE *fptr= fopen("final_project_AVL.txt", "r");
+
+
+    if( fptr == NULL){
+        printf("Error at loadingAllDataFromFile:\nError code: 1\n");
+        exit(1);
+    }
+
 
 //id name email nrc pass phNumber
-    for (int i = 0; i < SIZE ; ++i) {
-        struct node* new= newNode(i);
-        fscanf(fptr, "%d%s%s%s%s%llu",&new->id,&new->info->name,&new->info->email,&new->info->nrc,&new->info->password,&new->info->phNumber);
+        for (int i = 0; i < SIZE ; ++i) {
+            struct node* new_node= newNode(i);
+            db[users] = new_node;
+            fscanf(fptr, "%d%s%s%s%s%llu",&new_node->id,&new_node->info->name,&new_node->info->email,&new_node->info->nrc,&new_node->info->password,&new_node->info->phNumber);
 
 
 
-        //to insert data
+            if(i == 0){
+                root= new_node;
+            }else{
+                root = insert(root,new_node->id);
+            }
+            //to insert data
 
-        db[users] = new;
 
 
-        if( db[i]->info->email[1] < 1 || db[i]->info->email[2] < 1){
-            break;
+            if( db[i]->info->email[1] < 1 || db[i]->info->email[2] < 1){
+                break;
+            }
+            users++;
+
         }
-        users++;
+        fclose(fptr);
 
-    }
-    fclose(fptr);
 }
+
 
 struct node* newNode(int id){
 
@@ -374,7 +385,7 @@ struct node* newNode(int id){
     }
 }
 
-void copy_two_char_array(char receiver[100] ,char transmitter[100] ){
+void copy_two_char_array(struct node* receiver ,struct node* transmitter ){
     int transmit_counter = charCounting(transmitter);
     for(int i=0; i<transmit_counter; i++){
         receiver[i] = transmitter[i];
@@ -394,5 +405,122 @@ int check_input(char input){
     }
 }
 
+int balance_factor(struct node* root)
+{
+    int lh, rh;
+    if (root == NULL)
+        return 0;
+    if (root->left == NULL)
+        lh = 0;
+    else
+        lh = 1 + root->left->height;
+    if (root->right == NULL)
+        rh = 0;
+    else
+        rh = 1 + root->right->height;
+    return lh - rh;
+}
 
+int height(struct node* root)
+{
+    int lh, rh;
+    if (root == NULL)
+    {
+        return 0;
+    }
+    if (root->left == NULL)
+        lh = 0;
+    else
+        lh = 1 + root->left->height;
+    if (root->right == NULL)
+        rh = 0;
+    else
+        rh = 1 + root->right->height;
+
+    if (lh > rh)
+        return (lh);
+    return (rh);
+}
+struct node* rotate_right(struct node* root)
+{
+    struct node* left_child = root->left;
+    root->left = left_child->right;
+    left_child->right = root;
+
+    // update the heights of the nodes
+    root->height = height(root);
+    left_child->height = height(left_child);
+
+    // return the new node after rotation
+    return left_child;
+}
+
+struct node* rotate_left(struct node* root)
+{
+    struct node* right_child = root->right;
+    root->right = right_child->left;
+    right_child->left = root;
+
+    // update the heights of the nodes  
+    root->height = height(root);
+    right_child->height = height(right_child);
+
+    // return the new node after rotation
+    return right_child;
+}
+
+struct node* insert(struct node* bla, int data)
+{
+    if (bla == NULL)
+    {
+        struct node* new_node = newNode(data);
+        if (new_node == NULL)
+        {
+            return NULL;
+        }
+        bla = new_node;
+    }
+    else if (data > bla->id)
+    {
+        // insert the new node to the right
+        bla->right = insert(bla->right, data);
+
+
+        // tree is unbalanced, then rotate it
+        if (balance_factor(root) == -2)
+        {
+            if (data > bla->right->id)
+            {
+                bla = rotate_left(bla);
+            }
+            else
+            {
+                bla->right = rotate_right(bla->right);
+                bla = rotate_left(bla);
+            }
+        }
+    }
+    else
+    {
+        // insert the new node to the left
+        bla->left = insert(bla->left, data);
+
+        // tree is unbalanced, then rotate it
+        if (balance_factor(bla) == 2)
+        {
+            if (data < bla->left->id)
+            {
+                bla = rotate_right(bla);
+            }
+            else
+            {
+                bla->left = rotate_left(bla->left);
+                bla = rotate_right(bla);
+            }
+        }
+    }
+    // update the heights of the nodes
+    bla->height = height(bla);
+    return bla;
+}
 #endif MYFIRSTPROGRAM_ONLINEBANK_AVL_H
